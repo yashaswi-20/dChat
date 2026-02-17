@@ -87,7 +87,7 @@ src/
 ## Live Application
 
 The application is deployed and accessible at the following URL:
-**[https://your-dchat-deployment.vercel.app](https://your-dchat-deployment.vercel.app)**
+**[https://d-chatapp.vercel.app](https://d-chatapp.vercel.app)**
 
 ## License
 

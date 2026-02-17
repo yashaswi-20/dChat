@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useWalletClient, useAccount } from "wagmi";
 import { ChatClient, createXmtpClient, getXmtpClient, disconnectXmtpClient } from "@/lib/xmtp/client";
 import { ChatLayout } from "@/components/chat/ChatLayout";
@@ -18,6 +18,8 @@ export default function ChatPage() {
     const [revocationInboxId, setRevocationInboxId] = useState<string | null>(null);
     const [isRevoking, setIsRevoking] = useState(false);
 
+    const initRef = useRef(false);
+
     useEffect(() => {
         // Reset if wallet disconnects
         if (!isConnected || !walletClient) {
@@ -25,14 +27,20 @@ export default function ChatPage() {
             setRevocationRequired(false);
             setRevocationInboxId(null);
             disconnectXmtpClient();
+            initRef.current = false;
             return;
         }
 
         const init = async () => {
+            // Prevent multiple in-flight requests
+            if (initRef.current) return;
+            initRef.current = true;
+
             // If we already have a client with same address, reuse
             const existing = getXmtpClient();
             if (existing && existing.address === address) {
                 setClient(existing);
+                initRef.current = false;
                 return;
             }
 
@@ -50,7 +58,13 @@ export default function ChatPage() {
             } catch (e: any) {
                 console.error("XMTP Init Error", e);
                 const errorMessage = e.message || "Failed to initialize secure messaging.";
-                setError(errorMessage);
+
+                // If the error is regarding pending request, we can ignore it or tell user to check wallet
+                if (errorMessage.includes("already pending")) {
+                    setError("Please check your wallet for a pending signature request.");
+                } else {
+                    setError(errorMessage);
+                }
 
                 // Check for 10/10 installations error and extract Inbox ID
                 if (errorMessage.includes("already registered") && errorMessage.includes("installations")) {
@@ -62,13 +76,14 @@ export default function ChatPage() {
                 }
             } finally {
                 setIsInitializing(false);
+                initRef.current = false;
             }
         };
 
-        if (!revocationRequired) {
+        if (!revocationRequired && !client && !isInitializing) {
             init();
         }
-    }, [walletClient, address, isConnected, revocationRequired]);
+    }, [walletClient, address, isConnected, revocationRequired, client, isInitializing]);
 
     const handleRevoke = async () => {
         if (!walletClient || !revocationInboxId) return;

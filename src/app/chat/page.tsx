@@ -77,9 +77,10 @@ export default function ChatPage() {
             const { revokeOtherInstallations } = await import("@/lib/xmtp/client");
             await revokeOtherInstallations(walletClient, revocationInboxId, "dev");
             // After revocation, reset state to trigger re-init
-            setError(null);
-            setRevocationRequired(false);
-            setRevocationInboxId(null);
+            // Do NOT reset state here, as it triggers init() which conflicts with the DB lock
+            // setError(null);
+            // setRevocationRequired(false);
+            // setRevocationInboxId(null);
             setRevocationInboxId(null);
 
             // Wait a moment for the network/local storage to catch up

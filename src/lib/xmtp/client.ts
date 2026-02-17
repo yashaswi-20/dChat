@@ -136,7 +136,13 @@ export const revokeOtherInstallations = async (walletClient: WalletClient, inbox
 
         // Map to bytes for revocation
         // Accessing 'id' (which is bytes) from each installation
-        const installationIds = installations.map((inst: any) => inst.id as Uint8Array);
+        // Ensure we handle both hex strings and byte arrays
+        const installationIds = installations.map((inst: any) => {
+            if (typeof inst.id === "string") {
+                return inst.id.startsWith("0x") ? hexToBytes(inst.id as any) : hexToBytes(("0x" + inst.id) as any);
+            }
+            return inst.id as Uint8Array;
+        });
 
         console.log(`Revoking ${installationIds.length} installations...`);
 

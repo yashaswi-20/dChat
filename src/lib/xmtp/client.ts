@@ -143,7 +143,27 @@ export const revokeOtherInstallations = async (walletClient: WalletClient, inbox
         // 3. Revoke using static method
         await (Client as any).revokeInstallations(signer, inboxId, installationIds, env);
 
-        console.log("Revocation successful");
+        console.log("Revocation successful. Verifying state...");
+
+        // 4. Verify revocation (polling)
+        let retries = 5;
+        while (retries > 0) {
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s
+            try {
+                const newInboxStates = await (Client as any).fetchInboxStates([inboxId], env);
+                const newInstallations = newInboxStates?.[0]?.installations || [];
+                // account for the current installation that might still be there or if we revoked everything
+                if (newInstallations.length < installations.length) {
+                    console.log("Verification successful: Installation count dropped.");
+                    return;
+                }
+                console.log(`Verification pending: ${newInstallations.length} installations remaining...`);
+            } catch (err) {
+                console.warn("Verification check failed, retrying...", err);
+            }
+            retries--;
+        }
+        console.warn("Verification timed out. Proceeding regardless.");
 
     } catch (error) {
         console.error("Failed to revoke installations:", error);

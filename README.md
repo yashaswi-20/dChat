@@ -1,59 +1,44 @@
-# dChat Project Documentation
+# dChat
 
-**dChat** is a decentralized, secure messaging application built on the **XMTP (Extensible Message Transport Protocol)** network. It allows users to send encrypted messages directly between Ethereum wallet addresses without relying on centralized servers for data storage.
+![dChat Logo](./public/dChat.svg)
+
+[**Live Demo**](https://your-dchat-deployment.vercel.app) | [**Report Bug**](https://github.com/your-username/dChat/issues) | [**Request Feature**](https://github.com/your-username/dChat/issues)
+
+**dChat** is a decentralized, secure messaging application built on the **XMTP (Extensible Message Transport Protocol)** network. It enables wallet-to-wallet communication with end-to-end encryption, ensuring privacy and ownership of your data.
+
+![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)
+![XMTP](https://img.shields.io/badge/XMTP-V3-orange?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
 ## Key Features
 
-- **Wallet-to-Wallet Messaging**: Log in with your Ethereum wallet (MetaMask, Rainbow, etc.).
-- **End-to-End Encryption**: Messages are encrypted and can only be decrypted by the recipient.
-- **XMTP V3 Integration**: Uses the latest XMTP browser SDK for improved performance and group chat capabilities (ready).
-- **Session Management**: Handles device limits (10/10 installations) with a built-in revocation feature.
-- **Dark Mode UI**: A premium, monochromatic dark aesthetic using Tailwind CSS.
-- **Auto-Scroll**: Smart message scrolling that stays at the bottom of the chat.
+- **Wallet-to-Wallet Messaging**: Log in securely with your Ethereum wallet (MetaMask, Rainbow, etc.).
+- **End-to-End Encryption**: Messages are encrypted and can only be decrypted by the intended recipient.
+- **XMTP V3 Integration**: Utilizes the latest XMTP browser SDK for enhanced performance and group chat capabilities.
+- **Session Management**: Manages device limits (10/10 installations) with an integrated revocation feature.
+- **Dark Mode UI**: A premium, monochromatic dark aesthetic designed with Tailwind CSS.
+- **Auto-Scroll**: Smart scrolling behavior that keeps you at the latest message.
 - **IPFS File Sharing**: Securely share images and files using Pinata IPFS and XMTP Remote Attachments.
-- **Smart Date Headers**: Messages are automatically grouped by date (Today, Yesterday, etc.).
-- **Delete for Everyone**: Recall messages for all participants using custom XMTP content types.
-- **Responsive Design**: Fully functional on mobile and desktop devices.
+- **Smart Date Headers**: Messages are intuitively grouped by date (Today, Yesterday, etc.).
+- **Delete for Everyone**: Withdraw messages for all participants using custom XMTP content types.
+- **Responsive Design**: Optimized for a seamless experience on both mobile and desktop devices.
 
 ## Tech Stack
 
 ### Core Frameworks
-- **Next.js 16 (App Router)**: The React framework for production. Handles routing and server-side rendering.
-- **TypeScript**: Ensures type safety across the application.
-- **Tailwind CSS 4**: Utility-first CSS framework for styling.
-- **shadcn/ui**: Reusable components built with Radix UI and Tailwind CSS.
+- **[Next.js 16 (App Router)](https://nextjs.org/)**: The React framework for production, handling routing and server-side rendering.
+- **[TypeScript](https://www.typescriptlang.org/)**: Ensures type safety and developer productivity.
+- **[Tailwind CSS 4](https://tailwindcss.com/)**: A utility-first CSS framework for rapid UI development.
+- **[shadcn/ui](https://ui.shadcn.com/)**: Reusable components built with Radix UI and Tailwind CSS.
 
 ### Web3 & Messaging
-- **@xmtp/browser-sdk (V3)**: The core library for interacting with the XMTP network.
-- **Wagmi & Viem**: Hooks and utilities for Ethereum wallet connection and interactions.
-- **RainbowKit**: A polished UI for connecting wallets.
-- **Pinata SDK (pinata-web3)**: IPFS service for decentralized file storage.
-- **@xmtp/content-type-remote-attachment**: Codec for handling large file attachments.
-
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-### Environment Variables
-
-Create a `.env.local` file in the root directory and add the following variables:
-
-```bash
-NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_project_id_here
-NEXT_PUBLIC_PINATA_JWT=your_pinata_jwt_here
-```
+- **[@xmtp/browser-sdk (V3)](https://xmtp.org/)**: The core library for interacting with the XMTP network.
+- **[Wagmi](https://wagmi.sh/) & [Viem](https://viem.sh/)**: Essential hooks and utilities for Ethereum wallet interaction.
+- **[RainbowKit](https://www.rainbowkit.com/)**: A polished, customizable wallet connection UI.
+- **[Pinata SDK (pinata-web3)](https://www.pinata.cloud/)**: Decentralized file storage for secure attachment handling.
+- **@xmtp/content-type-remote-attachment**: Standard codec for handling large file attachments.
 
 ## Project Structure
 
@@ -62,7 +47,7 @@ The project follows a standard Next.js App Router structure, with logic separate
 ```
 src/
 ├── app/                    # Next.js App Router pages
-│   ├── chat/               # Main chat interface route
+│   ├── chat/               # Main chat interface route (Protected)
 │   │   └── page.tsx        # Chat page entry point
 │   ├── layout.tsx          # Global layout (Providers, Fonts)
 │   └── page.tsx            # Landing page (redirects to /chat)
@@ -74,14 +59,11 @@ src/
 │   │   ├── ChatLayout.tsx          # Main grid layout
 │   │   ├── ChatSidebar.tsx         # List of active conversations
 │   │   ├── ChatWindow.tsx          # Message view for a specific chat
-│   │   ├── ConversationListItem.tsx
 │   │   ├── MessageBubble.tsx       # Styled message row
-│   │   ├── MessageInput.tsx        # Text input area
-│   │   └── NewChatModal.tsx        # Start new conversation
+│   │   ├── NewChatModal.tsx        # Start new conversation
 │   ├── layout/             # Shared layout components
 │   │   └── navbar.tsx
 │   ├── ui/                 # Reusable UI components (shadcn/ui)
-│   │   ├── button.tsx, dialog.tsx, input.tsx, etc.
 │   └── providers.tsx       # Global providers wrapper
 │
 ├── hooks/
@@ -97,27 +79,16 @@ src/
 │       ├── conversations.ts
 │       ├── messages.ts     # Message handling
 │       └── codecs/         # Custom Content Types
-│           └── DeleteCodec.ts
 │
 └── types/
     └── chat.ts             # TypeScript definitions
 ```
 
-## Common Issues & Solutions
+## Live Application
 
-### "10/10 Installations" Error
-- **Cause**: XMTP allows a max of 10 login sessions per wallet.
-- **Fix**: The app automatically detects this error and shows a **"Revoke Other Sessions"** button. This calls `revokeOtherInstallations` to clear old keys.
+The application is deployed and accessible at the following URL:
+**[https://your-dchat-deployment.vercel.app](https://your-dchat-deployment.vercel.app)**
 
-### "OPFS / Secure Context" Error on Mobile
-- **Cause**: XMTP V3 requires HTTPS to access the File System API.
-- **Fix**: Always serve the app over HTTPS. If testing on mobile via local network, use a tunneling service (like ngrok) or port forwarding.
+## License
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This project is licensed under the [MIT License](LICENSE).

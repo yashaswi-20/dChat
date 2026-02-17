@@ -80,7 +80,12 @@ export default function ChatPage() {
             setError(null);
             setRevocationRequired(false);
             setRevocationInboxId(null);
-            window.location.reload(); // Hard reload to ensure clean state
+            setRevocationInboxId(null);
+
+            // Wait a moment for the network/local storage to catch up
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
         } catch (e: any) {
             console.error("Revocation failed", e);
             setError("Failed to revoke sessions: " + e.message);

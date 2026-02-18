@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ChatMessage } from "@/types/chat";
 import { format } from "date-fns";
-import { FileIcon, Loader2, Trash2 } from "lucide-react";
+import { FileIcon, Loader2, Trash2, Download } from "lucide-react";
 import { AttachmentCodec, RemoteAttachmentCodec, Attachment, RemoteAttachment } from "@xmtp/content-type-remote-attachment";
 // import { getXmtpClient } from "@/lib/xmtp/client";
 
@@ -65,7 +65,20 @@ export const MessageBubble = ({ message, isMe, onImageLoad, onDelete }: MessageB
 
     const displayAttachment = loadedAttachment || (isDirectAttachment ? content : null);
 
+    const handleDownload = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!displayAttachment) return;
 
+        const blob = new Blob([displayAttachment.data], { type: displayAttachment.mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = displayAttachment.filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
 
     return (
         <div
@@ -80,12 +93,21 @@ export const MessageBubble = ({ message, isMe, onImageLoad, onDelete }: MessageB
                 >
                     {displayAttachment ? (
                         imageUrl ? (
-                            <img
-                                src={imageUrl}
-                                alt={displayAttachment.filename}
-                                className="rounded-xl max-h-[300px] w-auto object-cover"
-                                onLoad={onImageLoad}
-                            />
+                            <div className="relative group/image">
+                                <img
+                                    src={imageUrl}
+                                    alt={displayAttachment.filename}
+                                    className="rounded-xl max-h-[300px] w-auto object-cover"
+                                    onLoad={onImageLoad}
+                                />
+                                <button
+                                    onClick={handleDownload}
+                                    className="absolute bottom-2 right-2 p-1.5 bg-black/50 text-white rounded-full opacity-0 group-hover/image:opacity-100 transition-opacity hover:bg-black/70"
+                                    title="Download image"
+                                >
+                                    <Download className="w-4 h-4" />
+                                </button>
+                            </div>
                         ) : (
                             <div className="flex items-center gap-3 p-2">
                                 <div className="p-2 bg-zinc-700/50 rounded-lg">
@@ -95,6 +117,13 @@ export const MessageBubble = ({ message, isMe, onImageLoad, onDelete }: MessageB
                                     <span className="text-sm font-medium truncate max-w-[150px]">{displayAttachment.filename}</span>
                                     <span className="text-xs text-zinc-500">{(displayAttachment.data.byteLength / 1024).toFixed(1)} KB</span>
                                 </div>
+                                <button
+                                    onClick={handleDownload}
+                                    className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-700 rounded-full transition-colors ml-2"
+                                    title="Download file"
+                                >
+                                    <Download className="w-4 h-4" />
+                                </button>
                             </div>
                         )
                     ) : isRemoteAttachment && isLoading ? (

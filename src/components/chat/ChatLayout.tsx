@@ -79,8 +79,8 @@ export const ChatLayout = ({ client }: ChatLayoutProps) => {
                 onClose={() => setIsNewChatModalOpen(false)}
                 client={client}
                 onConversationCreated={(conversation) => {
-                    // Optionally select it
-                    // setSelectedConversation(conversation);
+                    setSelectedConversation(conversation);
+                    setRefreshTrigger(prev => prev + 1);
                     setIsNewChatModalOpen(false);
                 }}
             />

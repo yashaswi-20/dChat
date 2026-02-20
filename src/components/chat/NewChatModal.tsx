@@ -42,6 +42,20 @@ export const NewChatModal = ({
             }
 
             const conversation = await createConversation(client, address);
+
+            // Remove from permanent delete blocklist if it was previously deleted
+            // (XMTP reuses the same conversation ID for the same peer)
+            try {
+                const raw = localStorage.getItem(`deleted-conversations-${client.inboxId}`);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed) && parsed.includes(conversation.id)) {
+                        const updated = parsed.filter((id: string) => id !== conversation.id);
+                        localStorage.setItem(`deleted-conversations-${client.inboxId}`, JSON.stringify(updated));
+                    }
+                }
+            } catch { /* ignore localStorage errors */ }
+
             onConversationCreated(conversation);
             onClose();
             setAddress("");

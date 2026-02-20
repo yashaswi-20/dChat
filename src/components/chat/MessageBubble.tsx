@@ -136,7 +136,7 @@ export const MessageBubble = ({ message, isMe, onImageLoad, onDelete }: MessageB
                             {error}
                         </div>
                     ) : typeof content === "string" ? (
-                        <p className="px-3 py-1 break-words leading-relaxed text-[15px]">{content}</p>
+                        <p className="px-3 py-1 leading-relaxed text-[15px] break-normal">{content}</p>
                     ) : (
                         <p className="px-3 py-1 text-xs italic text-zinc-500">System Message (Unsupported type)</p>
                     )}
@@ -152,10 +152,10 @@ export const MessageBubble = ({ message, isMe, onImageLoad, onDelete }: MessageB
                         // Simple approach: standard delete triggers new logic which asks
                         onDelete?.();
                     }}
-                    className={`opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity p-1.5 text-zinc-500 hover:text-red-500 hover:bg-zinc-800/50 rounded-full shrink-0`}
+                    className={`opacity-100 transition-opacity p-2 text-zinc-500 hover:text-zinc-50 hover:bg-zinc-900 rounded-full shrink-0`}
                     title="Delete message"
                 >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="w-4 h-4" />
                 </button>
             </div>
             <span className={`text-[10px] mt-1 px-1 text-zinc-500`}>

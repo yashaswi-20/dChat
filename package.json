@@ -1,6 +1,6 @@
 {
   "name": "dchat",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
@@ -12,6 +12,7 @@
     "@emnapi/core": "^1.8.1",
     "@emnapi/runtime": "^1.8.1",
     "@emnapi/wasi-threads": "^1.1.0",
+    "@gsap/react": "^2.1.2",
     "@napi-rs/wasm-runtime": "^0.2.12",
     "@rainbow-me/rainbowkit": "^2.2.10",
     "@tanstack/react-query": "^5.90.20",
@@ -23,6 +24,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.34.0",
+    "gsap": "^3.14.2",
     "lucide-react": "^0.563.0",
     "next": "16.1.6",
     "pinata-web3": "^0.5.4",

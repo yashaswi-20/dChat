@@ -3,18 +3,15 @@ import { IdentifierKind, ConsentState } from "@xmtp/wasm-bindings";
 import { ChatConversation } from "@/types/chat";
 
 export const listConversations = async (client: Client): Promise<ChatConversation[]> => {
-    console.log("Fetching conversations...");
-    // Filter out Denied conversations (deleted)
-    // Only show Allowed and Unknown (default)
+    // Filter out Denied conversations (deleted by user)
+    // Include Allowed + Unknown so new inbound DMs appear automatically
     const options = {
         consentStates: [ConsentState.Allowed, ConsentState.Unknown]
     };
-
-    // client.conversations.list() returns Promise<(Dm | Group)[]>
     const conversations = await client.conversations.list(options);
-    console.log(`Fetched ${conversations.length} conversations`);
     return conversations;
 };
+
 
 export const deleteConversation = async (conversation: ChatConversation): Promise<void> => {
     try {

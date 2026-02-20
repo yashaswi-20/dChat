@@ -6,6 +6,9 @@ import { ContentTypeDelete, DeleteCodec } from "./codecs/DeleteCodec";
 
 export const fetchMessages = async (conversation: ChatConversation): Promise<ChatMessage[]> => {
     try {
+        // Sync the conversation from the network first to get the latest messages.
+        // This is critical for User2 to see User1's messages without needing a manual refresh.
+        await conversation.sync();
         const messages = await conversation.messages();
         return messages;
     } catch (e) {

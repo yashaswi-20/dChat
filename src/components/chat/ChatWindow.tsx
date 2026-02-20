@@ -30,6 +30,7 @@ export const ChatWindow = ({ conversation, clientInboxId, onDeleteConversation, 
     const [isLoading, setIsLoading] = useState(true);
     const [isSending, setIsSending] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [showDeleteChatDialog, setShowDeleteChatDialog] = useState(false);
     const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -65,11 +66,23 @@ export const ChatWindow = ({ conversation, clientInboxId, onDeleteConversation, 
     };
 
     const handleDelete = async () => {
-        if (!confirm("Are you sure you want to delete this chat? It will be hidden until a new message is sent.")) return;
-
         setIsDeleting(true);
         try {
+            // 1. Set consent to Denied so it won't appear in conversation list
             await deleteConversation(conversation);
+
+            // 2. Add to permanent blocklist so it can never be restored
+            const blocklist = JSON.parse(localStorage.getItem(`deleted-conversations-${clientInboxId}`) || '[]');
+            if (!blocklist.includes(conversation.id)) {
+                blocklist.push(conversation.id);
+                localStorage.setItem(`deleted-conversations-${clientInboxId}`, JSON.stringify(blocklist));
+            }
+
+            // 3. Clean up related local storage data for this conversation
+            localStorage.removeItem(`hidden-messages-${clientInboxId}`);
+
+            setShowDeleteChatDialog(false);
+
             if (onDeleteConversation) {
                 onDeleteConversation();
             }
@@ -219,9 +232,9 @@ export const ChatWindow = ({ conversation, clientInboxId, onDeleteConversation, 
                     </div>
                 </div>
                 <button
-                    onClick={handleDelete}
+                    onClick={() => setShowDeleteChatDialog(true)}
                     disabled={isDeleting}
-                    className="p-2.5 text-zinc-400 hover:text-red-500 hover:bg-zinc-900 rounded-full transition-all duration-200"
+                    className="p-2.5 text-zinc-400 hover:text-zinc-50 hover:bg-zinc-900 rounded-full transition-all duration-200"
                     title="Delete Chat"
                 >
                     {isDeleting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Trash2 className="w-5 h-5" />}
@@ -281,19 +294,20 @@ export const ChatWindow = ({ conversation, clientInboxId, onDeleteConversation, 
 
             {/* Message Delete Dialog */}
             <Dialog open={!!messageToDelete} onOpenChange={(open) => !open && setMessageToDelete(null)}>
-                <DialogContent>
+                <DialogContent className="bg-zinc-950/95 border-zinc-800 backdrop-blur-xl rounded-2xl shadow-2xl max-w-sm">
                     <DialogHeader>
-                        <DialogTitle>Delete Message</DialogTitle>
-                        <DialogDescription>
+                        <DialogTitle className="text-white text-xl font-bold tracking-tight mb-1">Delete Message</DialogTitle>
+                        <DialogDescription className="text-zinc-400 text-sm">
                             Are you sure you want to delete this message? This action cannot be undone.
                         </DialogDescription>
                     </DialogHeader>
-                    <DialogFooter className="sm:justify-start gap-2">
+                    <DialogFooter className="flex flex-col gap-2 sm:flex-col pt-4">
                         {messages.find(m => m.id === messageToDelete)?.senderInboxId === clientInboxId && (
                             <Button
                                 type="button"
                                 variant="destructive"
                                 onClick={() => messageToDelete && handleDeleteMessage(messageToDelete, true)}
+                                className="w-full bg-red-600 hover:bg-red-700 text-white rounded-xl py-6 font-semibold transition-all"
                             >
                                 Delete for Everyone
                             </Button>
@@ -302,6 +316,7 @@ export const ChatWindow = ({ conversation, clientInboxId, onDeleteConversation, 
                             type="button"
                             variant="secondary"
                             onClick={() => messageToDelete && handleDeleteMessage(messageToDelete, false)}
+                            className="w-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-white rounded-xl py-6 font-semibold transition-all"
                         >
                             Delete for Me
                         </Button>
@@ -309,6 +324,53 @@ export const ChatWindow = ({ conversation, clientInboxId, onDeleteConversation, 
                             type="button"
                             variant="ghost"
                             onClick={() => setMessageToDelete(null)}
+                            className="w-full text-zinc-500 hover:text-white hover:bg-transparent transition-colors py-2"
+                        >
+                            Cancel
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete Chat Confirmation Dialog */}
+            <Dialog open={showDeleteChatDialog} onOpenChange={(open) => !open && setShowDeleteChatDialog(false)}>
+                <DialogContent className="w-min bg-zinc-950/95 border-zinc-800 backdrop-blur-xl rounded-3xl shadow-2xl p-6 md:p-8 max-w-md min-w-sm">
+                    <DialogHeader className="items-center text-center">
+                        <div className="w-16 h-16 bg-zinc-500/10 border border-zinc-500/20 rounded-2xl flex items-center justify-center mb-6 rotate-3">
+                            <Trash2 className="w-8 h-8 text-zinc-500" />
+                        </div>
+                        <DialogTitle className="text-2xl font-bold text-zinc-100 tracking-tight mb-2">
+                            Permanently Delete Chat
+                        </DialogTitle>
+                        <DialogDescription className="space-y-4 pt-1 text-left">
+                            <span className="block text-zinc-400 text-base leading-relaxed">
+                                Are you sure you want to <span className="text-zinc-100 font-semibold px-1">permanently delete</span> your conversation with <span className="text-white font-bold">{title.toUpperCase()}</span>?
+                            </span>
+                            {/* <span className="block p-4 bg-zinc-500/5 border border-zinc-500/10 rounded-2xl"> */}
+                            <span className="text-zinc-400 text-sm font-medium flex items-center justify-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse"></span>
+                                This action is irreversible
+                            </span>
+                            {/* </span> */}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="flex flex-col items-center gap-3 sm:flex-col pt-4">
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            onClick={handleDelete}
+                            disabled={isDeleting}
+                            className="w-min bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl py-6 text-lg font-bold transition-all shadow-lg shadow-zinc-900/20 gap-3"
+                        >
+                            {isDeleting ? <Loader2 className="w-6 h-6 animate-spin" /> : <Trash2 className="w-6 h-6" />}
+                            Delete Permanently
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => setShowDeleteChatDialog(false)}
+                            disabled={isDeleting}
+                            className="w-min text-zinc-500 hover:text-white hover:bg-zinc-900 rounded-2xl py-6 font-semibold transition-all"
                         >
                             Cancel
                         </Button>

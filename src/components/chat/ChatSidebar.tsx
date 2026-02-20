@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
-import { LoginButton } from "@/components/auth/login-button";
-import { Client } from "@xmtp/browser-sdk";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Client, ConsentState } from "@xmtp/browser-sdk";
 import { ChatConversation } from "@/types/chat";
 import { listConversations } from "@/lib/xmtp/conversations";
 import { Plus, MessageSquare } from "lucide-react";
@@ -24,33 +23,162 @@ export const ChatSidebar = ({
 }: ChatSidebarProps) => {
     const [conversations, setConversations] = useState<ChatConversation[]>([]);
     const [loading, setLoading] = useState(true);
+    const isMounted = useRef(true);
+
+    // Get the permanent blocklist of deleted conversation IDs
+    const getDeletedBlocklist = useCallback((): string[] => {
+        try {
+            const raw = localStorage.getItem(`deleted-conversations-${client.inboxId}`);
+            if (!raw) return [];
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    }, [client.inboxId]);
+
+    // ─── listAndSetConversations ───────────────────────────────────────────────
+    // Reads conversations from the LOCAL DB and updates state.
+    // Does NOT call sync() — use this when the XMTP stream has already
+    // materialized the conversation (e.g. inside streamAllMessages callback).
+    const listAndSetConversations = useCallback(async () => {
+        try {
+            const convs = await listConversations(client);
+            const blocklist = getDeletedBlocklist();
+            const filtered = convs.filter(c => !blocklist.includes(c.id));
+            if (isMounted.current) setConversations(filtered);
+        } catch (e) {
+            console.error("Failed to list conversations", e);
+        }
+    }, [client, getDeletedBlocklist]);
+
+    // ─── refreshConversations ──────────────────────────────────────────────────
+    // Syncs from XMTP network first (discovers new welcome messages), THEN lists.
+    // Use this for polling where we need to pull from the network.
+    const refreshConversations = useCallback(async () => {
+        try {
+            await client.conversations.sync();
+            await listAndSetConversations();
+        } catch (e) {
+            console.error("Failed to refresh conversations", e);
+        }
+    }, [client, listAndSetConversations]);
 
     useEffect(() => {
-        const fetchConversations = async () => {
+        isMounted.current = true;
+        let convStreamCleanup: (() => void) | undefined;
+        let msgStreamCleanup: (() => void) | undefined;
+        let pollInterval: ReturnType<typeof setInterval> | undefined;
+
+        // ─── INITIAL LOAD ──────────────────────────────────────────────────────────
+        const doInitialLoad = async () => {
             try {
-                const convs = await listConversations(client);
-                setConversations(convs);
+                // Use the more thorough syncAll() for the very first load
+                // to ensure we catch everything (new welcomes + sync server history)
+                await client.conversations.syncAll();
+                await listAndSetConversations();
             } catch (e) {
-                console.error("Failed to load conversations", e);
+                console.error("Failed initial load", e);
+                // Fallback to refreshConversations if syncAll fails
+                await refreshConversations();
             } finally {
-                setLoading(false);
+                if (isMounted.current) setLoading(false);
             }
         };
 
-        fetchConversations();
-
-        const stream = async () => {
+        // ─── POLLING (every 3 seconds) ─────────────────────────────────────────────
+        // Calls sync() + list() as a fallback to catch anything the stream misses.
+        // Runs independently — no lock, so it never blocks the stream callback.
+        pollInterval = setInterval(async () => {
+            if (!isMounted.current) return;
             try {
-                const stream = await client.conversations.stream();
-                for await (const conversation of stream) {
-                    setConversations((prev) => [conversation, ...prev]);
-                }
+                await refreshConversations();
+            } catch { /* ignore */ }
+        }, 3000);
+
+        // ─── CONVERSATION STREAM ───────────────────────────────────────────────────
+        // Fires immediately when User1 creates a DM and the welcome push arrives.
+        const doConvStream = async () => {
+            try {
+                const convStream = await client.conversations.stream();
+                let isStreaming = true;
+
+                (async () => {
+                    try {
+                        for await (const conversation of convStream) {
+                            if (!isStreaming || !isMounted.current) break;
+                            const blocklist = getDeletedBlocklist();
+                            if (blocklist.includes(conversation.id)) continue;
+
+                            // Pre-sync so messages are ready when User2 clicks the chat
+                            try { await conversation.sync(); } catch { /* ignore */ }
+
+                            // Add to list (deduplicated)
+                            setConversations((prev: ChatConversation[]) => {
+                                if (prev.some((c: ChatConversation) => c.id === conversation.id)) return prev;
+                                return [conversation, ...prev];
+                            });
+                        }
+                    } catch (e) {
+                        if (isStreaming) console.error("Conv stream error", e);
+                    }
+                })();
+
+                convStreamCleanup = () => {
+                    isStreaming = false;
+                    if (convStream && typeof convStream.return === "function") convStream.return();
+                };
             } catch (e) {
-                console.error("Stream conversations error", e);
+                console.error("Failed to start conv stream", e);
             }
         };
-        stream();
-    }, [client, refreshTrigger]);
+
+        // ─── ALL-MESSAGES STREAM ───────────────────────────────────────────────────
+        // THE KEY FIX: consentStates includes Unknown so messages from brand-new
+        // unknown senders are included. Without this, the SDK defaults to
+        // Allowed-only and silently ignores all new inbound DMs.
+        //
+        // When this fires, the XMTP stream has already materialized the conversation
+        // in the local DB — so we only need list() (no sync() required here).
+        const doMsgStream = async () => {
+            try {
+                const msgStream = await client.conversations.streamAllMessages({
+                    consentStates: [ConsentState.Allowed, ConsentState.Unknown],
+                });
+                let isStreaming = true;
+
+                (async () => {
+                    try {
+                        for await (const message of msgStream) {
+                            if (!isStreaming || !isMounted.current) break;
+                            // Stream already processed the welcome → conversation is in local DB.
+                            // Just list() to refresh sidebar — no need to sync() again.
+                            await listAndSetConversations();
+                        }
+                    } catch (e) {
+                        if (isStreaming) console.error("All-messages stream error", e);
+                    }
+                })();
+
+                msgStreamCleanup = () => {
+                    isStreaming = false;
+                    if (msgStream && typeof msgStream.return === "function") msgStream.return();
+                };
+            } catch (e) {
+                console.error("Failed to start all-messages stream", e);
+            }
+        };
+
+        // Run all three in parallel — none block each other
+        Promise.all([doInitialLoad(), doConvStream(), doMsgStream()]).catch(() => { });
+
+        return () => {
+            isMounted.current = false;
+            if (convStreamCleanup) convStreamCleanup();
+            if (msgStreamCleanup) msgStreamCleanup();
+            if (pollInterval) clearInterval(pollInterval);
+        };
+    }, [client, refreshTrigger, getDeletedBlocklist, refreshConversations, listAndSetConversations]);
 
     return (
         <div className="flex flex-col h-full bg-zinc-950">
@@ -97,7 +225,6 @@ export const ChatSidebar = ({
                 >
                     <Plus className="w-5 h-5" />
                 </button>
-
             </div>
 
             <div className="p-4 border-t border-zinc-900 bg-black/50 backdrop-blur-xl flex justify-between items-center">
@@ -112,4 +239,3 @@ export const ChatSidebar = ({
         </div>
     );
 };
-

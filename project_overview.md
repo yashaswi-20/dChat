@@ -1,5 +1,8 @@
 # dChat Project Documentation
 
+[← Back to README](./README.md)
+
+
 ## 1. Project Overview
 **dChat** is a decentralized, secure messaging application built on the **XMTP (Extensible Message Transport Protocol)** network. It allows users to send encrypted messages directly between Ethereum wallet addresses without relying on centralized servers for data storage.
 

@@ -1,94 +1,93 @@
 # dChat
 
-![dChat Logo](./public/dChat.svg)
+<div align="center">
+  <img src="./public/readme-banner.png" alt="dChat Banner" width="100%">
+  <br />
+  
+  <h3>Secure. Decentralized. Privacy-First Messaging.</h3>
+  
+  <p align="center">
+    <a href="https://d-chatapp.vercel.app"><b>Live Demo</b></a> •
+    <a href="#key-features">Features</a> •
+    <a href="./project_overview.md">Documentation</a> •
+    <a href="https://github.com/Swadesh-c0de/dChat/issues">Report Bug</a>
+  </p>
 
-[**Live Demo**](https://your-dchat-deployment.vercel.app) | [**Report Bug**](https://github.com/your-username/dChat/issues) | [**Request Feature**](https://github.com/your-username/dChat/issues)
+  [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+  [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+  [![XMTP](https://img.shields.io/badge/XMTP-V3-orange?style=for-the-badge)](https://xmtp.org/)
 
-**dChat** is a decentralized, secure messaging application built on the **XMTP (Extensible Message Transport Protocol)** network. It enables wallet-to-wallet communication with end-to-end encryption, ensuring privacy and ownership of your data.
+</div>
 
-![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)
-![XMTP](https://img.shields.io/badge/XMTP-V3-orange?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+---
 
-## Key Features
+## 🚀 Overview
 
-- **Wallet-to-Wallet Messaging**: Log in securely with your Ethereum wallet (MetaMask, Rainbow, etc.).
-- **End-to-End Encryption**: Messages are encrypted and can only be decrypted by the intended recipient.
-- **XMTP V3 Integration**: Utilizes the latest XMTP browser SDK for enhanced performance and group chat capabilities.
-- **Session Management**: Manages device limits (10/10 installations) with an integrated revocation feature.
-- **Dark Mode UI**: A premium, monochromatic dark aesthetic designed with Tailwind CSS.
-- **Auto-Scroll**: Smart scrolling behavior that keeps you at the latest message.
-- **IPFS File Sharing**: Securely share images and files using Pinata IPFS and XMTP Remote Attachments.
-- **Smart Date Headers**: Messages are intuitively grouped by date (Today, Yesterday, etc.).
-- **Delete for Everyone**: Withdraw messages for all participants using custom XMTP content types.
-- **Responsive Design**: Optimized for a seamless experience on both mobile and desktop devices.
+**dChat** is a cutting-edge decentralized messaging platform built on the **XMTP (Extensible Message Transport Protocol)**. It empowers users with end-to-end encrypted, wallet-to-wallet communication, ensuring that your data remains yours—private, secure, and permanent on the decentralized web.
 
-## Tech Stack
+<div align="center">
+  <a href="https://d-chatapp.vercel.app">
+    <img src="https://img.shields.io/badge/LAUNCH_APPLICATION-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Launch App">
+  </a>
+  <a href="./project_overview.md">
+    <img src="https://img.shields.io/badge/PROJECT_OVERVIEW-059669?style=for-the-badge&logo=read-the-docs&logoColor=white" alt="View Documentation">
+  </a>
+</div>
 
-### Core Frameworks
-- **[Next.js 16 (App Router)](https://nextjs.org/)**: The React framework for production, handling routing and server-side rendering.
-- **[TypeScript](https://www.typescriptlang.org/)**: Ensures type safety and developer productivity.
-- **[Tailwind CSS 4](https://tailwindcss.com/)**: A utility-first CSS framework for rapid UI development.
-- **[shadcn/ui](https://ui.shadcn.com/)**: Reusable components built with Radix UI and Tailwind CSS.
+---
 
-### Web3 & Messaging
-- **[@xmtp/browser-sdk (V3)](https://xmtp.org/)**: The core library for interacting with the XMTP network.
-- **[Wagmi](https://wagmi.sh/) & [Viem](https://viem.sh/)**: Essential hooks and utilities for Ethereum wallet interaction.
-- **[RainbowKit](https://www.rainbowkit.com/)**: A polished, customizable wallet connection UI.
-- **[Pinata SDK (pinata-web3)](https://www.pinata.cloud/)**: Decentralized file storage for secure attachment handling.
-- **@xmtp/content-type-remote-attachment**: Standard codec for handling large file attachments.
+## ✨ Key Features
 
-## Project Structure
+- 🔐 **Wallet-to-Wallet**: Instant messaging between any Ethereum-compatible addresses.
+- 🛡️ **End-to-End Encryption**: Military-grade security powered by XMTP V3 (MLS protocol).
+- 📁 **Private File Sharing**: Secure attachments (Images, PDF, etc.) via encrypted IPFS uploads.
+- ⚡ **Real-time Sync**: Seamless message streaming and instant notifications across devices.
+- 🌘 **Cinematic UI**: A premium dark-mode aesthetic with noise-overlays and fluid animations.
+- 📱 **Responsive Design**: Fully optimized for Desktop, Tablet, and Mobile screens.
+- 🗑️ **Delete for Everyone**: Full control over your sent messages with withdrawal support.
+- 🔄 **Session Management**: Advanced device installation management and revocation.
 
-The project follows a standard Next.js App Router structure, with logic separated into `components`, `lib`, and `hooks`.
+---
 
-```
+## 🛠️ Tech Stack
+
+### Core
+- **Framework**: [Next.js 15+](https://nextjs.org/) (App Router)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
+- **Animations**: [Framer Motion](https://www.framer.com/motion/)
+
+### Web3 & Protocol
+- **Messaging**: [@xmtp/browser-sdk](https://xmtp.org/) (V3)
+- **Wallet Connection**: [RainbowKit](https://www.rainbowkit.com/) & [Wagmi](https://wagmi.sh/)
+- **Decentralized Storage**: [Pinata IPFS](https://www.pinata.cloud/)
+- **Blockchain Utils**: [Viem](https://viem.sh/)
+
+---
+
+## 📁 Project Structure
+
+```bash
 src/
-├── app/                    # Next.js App Router pages
-│   ├── chat/               # Main chat interface route (Protected)
-│   │   └── page.tsx        # Chat page entry point
-│   ├── layout.tsx          # Global layout (Providers, Fonts)
-│   └── page.tsx            # Landing page (redirects to /chat)
-│
-├── components/
-│   ├── auth/               # Authentication components
-│   │   └── login-button.tsx
-│   ├── chat/               # Chat-specific UI components
-│   │   ├── ChatLayout.tsx          # Main grid layout
-│   │   ├── ChatSidebar.tsx         # List of active conversations
-│   │   ├── ChatWindow.tsx          # Message view for a specific chat
-│   │   ├── MessageBubble.tsx       # Styled message row
-│   │   ├── NewChatModal.tsx        # Start new conversation
-│   ├── layout/             # Shared layout components
-│   │   └── navbar.tsx
-│   ├── ui/                 # Reusable UI components (shadcn/ui)
-│   └── providers.tsx       # Global providers wrapper
-│
-├── hooks/
-│   ├── use-toast.tsx       # Toast notifications
-│   └── useConversationDisplay.ts
-│
-├── lib/
-│   ├── ipfs.ts             # IPFS Upload Service
-│   ├── logger.ts           # Logging utility
-│   ├── utils.ts            # Class merging utility (cn)
-│   └── xmtp/               # XMTP Logic Isolation
-│       ├── client.ts       # Client creation & config
-│       ├── conversations.ts
-│       ├── messages.ts     # Message handling
-│       └── codecs/         # Custom Content Types
-│
-└── types/
-    └── chat.ts             # TypeScript definitions
+├── app/          # App Router & Page Definitions
+├── components/   # UI System & Specialized Chat Modules
+├── hooks/        # Custom React Hooks for Protocol & UI
+├── lib/          # Core Logic: XMTP, IPFS, & Utilities
+└── types/        # Global TypeScript Definitions
 ```
 
-## Live Application
+> [!TIP]
+> For a deep dive into the architecture and implementation details, check out the [Technical Project Overview](./project_overview.md).
 
-The application is deployed and accessible at the following URL:
-**[https://d-chatapp.vercel.app](https://d-chatapp.vercel.app)**
+---
 
-## License
+## 📜 License
 
-This project is licensed under the [MIT License](LICENSE).
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+<p align="center">
+  Built with ❤️ for the Decentralized Web.
+</p>
